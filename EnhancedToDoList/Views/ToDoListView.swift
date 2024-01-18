@@ -12,53 +12,60 @@ struct ToDoListView: View {
     // The item currently being created
     @State private var newItemDetails = ""
     
-        // Our list of items to complete
-        @State private var items: [TodoItem] = []
-        
-        // MARK: Computed properties
-        var body: some View {
-            NavigationStack {
-                VStack {
+    // Our list of items to complete
+    @State private var items: [TodoItem] = []
+    
+    // MARK: Computed properties
+    var body: some View {
+        NavigationStack {
+            VStack {
+                HStack {
+                    TextField("Enter a to-do item", text: $newItemDetails)
                     
-                    HStack {
-                        
-                        TextField("Enter a to-do item", text: $newItemDetails)
-                        
-                        Button("Add") {
-                            addItem()
-                        }
-
+                    Button("Add") {
+                        addItem()
                     }
-                    .padding(20)
-                    
-                    if items.isEmpty {
-                        ContentUnavailableView(label: {
-                            Label(
-                                "Nothing to do",
-                                systemImage: "powersleep")
+                }
+                .padding(20)
+                
+                if items.isEmpty {
+                    ContentUnavailableView(label: {
+                        Label(
+                            "Nothing to do",
+                            systemImage: "powersleep")
                             .foregroundColor(.green)
-                        }, description: {
-                            Text("To do items will appear once you add some")
-                        })
-                    } else {
-                        List(items) { currentItem in
-                            Label {
-                                Text(currentItem.details)
-                            } icon: {
-                                Image(systemName: currentItem.isCompleted ? "checkmark.circle" : "circle")
+                    }, description: {
+                        Text("To do items will appear once you add some")
+                    })
+                } else {
+                    List {
+                        ForEach(items) { currentItem in
+                            HStack {
+                                Label {
+                                    Text(currentItem.details)
+                                } icon: {
+                                    Image(systemName: currentItem.isCompleted ? "checkmark.circle" : "circle")
+                                        .onTapGesture {
+                                            toggle(item: currentItem)
+                                        }
+                                }
                             }
                         }
+                        .onDelete { indexSet in
+                            deleteItems(at: indexSet)
+                        }
                     }
                 }
-                .navigationTitle("Tasks")
             }
-            .onAppear {
-                // Populate with example data
-                if items.isEmpty {
-//                    items.append(contentsOf: exampleData)
-                }
+            .navigationTitle("Tasks")
+        }
+        .onAppear {
+            // Populate with example data
+            if items.isEmpty {
+                // items.append(contentsOf: exampleData)
             }
         }
+    }
     
     // MARK: Functions
     func addItem() {
@@ -67,8 +74,24 @@ struct ToDoListView: View {
         newItemDetails = ""
     }
     
+    func toggle(item: TodoItem) {
+        if item.isCompleted {
+            item.completedOn = nil
+            item.isCompleted = false
+        } else {
+            item.completedOn = Date()
+            item.isCompleted = true
+        }
+    }
+    
+    func deleteItems(at offsets: IndexSet) {
+        items.remove(atOffsets: offsets)
+    }
 }
 
-#Preview {
-    LandingView()
+struct ToDoListView_Previews: PreviewProvider {
+    static var previews: some View {
+        ToDoListView()
+    }
 }
+
