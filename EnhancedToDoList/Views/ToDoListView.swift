@@ -5,15 +5,18 @@
 //  Created by Tom Wu on 2024-01-18.
 //
 
+import SwiftData
 import SwiftUI
 
 struct ToDoListView: View {
     // MARK: Stored properties
+    @Environment(\.modelContext) private var modelContext
+    
     // The item currently being created
     @State private var newItemDetails = ""
     
     // Our list of items to complete
-    @State private var items: [TodoItem] = []
+    @Query private var items: [TodoItem]
     
     @State var searchText = ""
     
@@ -73,18 +76,12 @@ struct ToDoListView: View {
             }
             .navigationTitle("Tasks")
         }
-        .onAppear {
-            // Populate with example data
-            if items.isEmpty {
-                // items.append(contentsOf: exampleData)
-            }
-        }
     }
     
     // MARK: Functions
     func addItem() {
         let newToDoItem = TodoItem(details: newItemDetails)
-        items.insert(newToDoItem, at: 0)
+        modelContext.insert(newToDoItem)
         newItemDetails = ""
     }
     
@@ -99,7 +96,9 @@ struct ToDoListView: View {
     }
     
     func deleteItems(at offsets: IndexSet) {
-        items.remove(atOffsets: offsets)
+        for offset in offsets {
+            modelContext.delete(items[offset])
+        }
     }
 }
 
