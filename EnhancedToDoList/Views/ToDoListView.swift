@@ -15,6 +15,19 @@ struct ToDoListView: View {
     // Our list of items to complete
     @State private var items: [TodoItem] = []
     
+    @State var searchText = ""
+    
+    // Provide list of to-do items filtered based on the search text
+    var filteredItems: [TodoItem] {
+        if searchText.isEmpty {
+            return items
+        } else {
+            return items.filter { item in
+                item.details.lowercased().contains(searchText.lowercased())
+            }
+        }
+    }
+    
     // MARK: Computed properties
     var body: some View {
         NavigationStack {
@@ -39,7 +52,7 @@ struct ToDoListView: View {
                     })
                 } else {
                     List {
-                        ForEach(items) { currentItem in
+                        ForEach(filteredItems) { currentItem in
                             HStack {
                                 Label {
                                     Text(currentItem.details)
@@ -54,6 +67,7 @@ struct ToDoListView: View {
                         .onDelete { indexSet in
                             deleteItems(at: indexSet)
                         }
+                        .searchable(text: $searchText)
                     }
                 }
             }
@@ -91,7 +105,7 @@ struct ToDoListView: View {
 
 struct ToDoListView_Previews: PreviewProvider {
     static var previews: some View {
-        ToDoListView()
+        LandingView()
     }
 }
 
